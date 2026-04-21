@@ -1,4 +1,4 @@
-todo_path = "C:/Users/donalda/Documents/todo/"
+todo_path = "."
 todo_f = "__todo.todo.txt"
 
 # ---------------------------------------
