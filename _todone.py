@@ -5,11 +5,37 @@ todo_f = "__todo.todo.txt"
 import os
 import sys
 
+def split_into_name_and_num(s):
+  if len(s) == 0 or s[-1] != ")":
+    return (s, 0)
+  for i in range(len(s) - 2, -1, -1):
+    if s[i] == "(":
+      if s[i + 1] == "0":
+        return (s, 0)
+      try:
+        num = int(s[i + 1:-1])
+      except ValueError:
+        return (s, 0)
+      if num == 0:
+        return (s, 0)
+      return (s[:i], num)
+  return (s, 0)
 
-def wait_for_enter():
-  print("<press enter to continue>")
-  sys.stdout.flush()
-  input()
+def rename_no_overwrite(f1, f2):
+  num = 1
+  while True:
+    try:
+      os.rename(f1, f2)
+    except FileNotFoundError:
+      return
+    except FileExistsError:
+      f2, num = split_into_name_and_num(f2)
+      if num == 0:
+        f2 += " (1)"
+      else:
+        f2 += f"({num + 1})"
+      continue
+    return
 
 def get_proj_f(line):
   for word in line.split():
@@ -39,11 +65,7 @@ for line in done_lines:
   if proj_f:
     proj_f_done = os.path.join(done_dir, proj_f)
     proj_f = os.path.join(todo_path, proj_f)
-    try:
-      os.rename(proj_f, proj_f_done)
-    except e:
-      print(e)
-      wait_for_enter()
+    rename_no_overwrite(proj_f, proj_f_done)
 
 with open(todo_f, "w") as file:
   file.writelines(not_done_lines)
